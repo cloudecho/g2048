@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:g2048/src/types.dart';
+import 'dart:math' as math;
 
-typedef Model = List<List<int>>;
+const _rank = 4;
 
 class GameState extends ChangeNotifier {
   GameState()
@@ -11,8 +13,6 @@ class GameState extends ChangeNotifier {
         ) {
     _init();
   }
-
-  static const _rank = 4;
 
   int get size => _rank;
 
@@ -36,8 +36,52 @@ class GameState extends ChangeNotifier {
   int num(int i, int j) => _model[i][j];
   String text(int i, int j) => 0 == num(i, j) ? '' : '${num(i, j)}';
 
-  void moveLeft() {}
-  void moveRight() {}
-  void moveUp() {}
-  void moveDown() {}
+  void swipeLeft() {
+    for (var i = 0; i < size; i++) {
+      _swipeLeft(i);
+    }
+    _nextNum();
+  }
+
+  void _swipeLeft(final int i) {
+    var k = 0; // number of zeros
+    for (; k < size && 0 == _model[i][k]; k++) {}
+    if (k == size - 1) {
+      // all zeros
+      return;
+    }
+    // shift k
+    for (var j = 0; j < size - k; j++) {
+      _model[i][j] = _model[i][j + k];
+    }
+  }
+
+  void swipeRight() {
+    _nextNum();
+  }
+
+  void swipeUp() {
+    _nextNum();
+  }
+
+  void swipeDown() {
+    _nextNum();
+  }
+
+  static final _rand = math.Random();
+
+  bool _nextNum() {
+    List<Point> points = [];
+    for (var i = 0; i < size; i++) {
+      for (var j = 0; j < size; j++) {
+        if (0 == _model[i][j]) points.add((x: i, y: j));
+      }
+    }
+    if (points.isEmpty) return false;
+
+    var p = points[_rand.nextInt(points.length)];
+    _model[p.x][p.y] = 2; // TODO 4
+    notifyListeners();
+    return true;
+  }
 }
