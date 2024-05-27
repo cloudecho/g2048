@@ -93,7 +93,7 @@ class Tile extends StatelessWidget {
       offset: offset,
       duration: const Duration(milliseconds: kSlideMilliseconds),
       child: TwinkleWidget(
-        begin: isNew ? 0.2 : 1.0,
+        begin: isNew ? 0.5 : 1.0,
         end: 1.0,
         repeat: false,
         speed: const Duration(milliseconds: kTwinkleMilliseconds),
@@ -102,7 +102,23 @@ class Tile extends StatelessWidget {
     );
   }
 
-  Color get _bgColor => num > 0 ? kMainColor.shade200 : kMainColor.shade400;
+  Color get _bgColor => switch (num) {
+        0 => kMainColor.shade400,
+        2 => kMainColor.shade200,
+        4 => Colors.indigoAccent.shade100,
+        8 => Colors.lightBlue.shade500,
+        16 => Colors.cyan.shade500,
+        32 => Colors.deepOrange.shade500,
+        64 => Colors.deepPurple.shade500,
+        128 => Colors.green.shade500,
+        256 => Colors.indigo.shade500,
+        512 => Colors.lime.shade500,
+        1024 => Colors.orangeAccent.shade400,
+        2048 => Colors.pinkAccent.shade200,
+        4096 => Colors.tealAccent.shade400,
+        8192 => Colors.yellow.shade500,
+        _ => kMainColor.shade600,
+      };
 
-  Color get _fontColor => Colors.black54;
+  Color get _fontColor => num > 4 ? Colors.white70 : Colors.black54;
 }
