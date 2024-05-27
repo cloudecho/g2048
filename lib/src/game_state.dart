@@ -206,7 +206,7 @@ class GameState extends ChangeNotifier {
     if (points.isEmpty) return false;
 
     var p = points[_rand.nextInt(points.length)];
-    _model[p.x][p.y] = 2; // TODO 4
+    _model[p.x][p.y] = _rand.nextDouble() < 0.1 ? 4 : 2;
     _newPostion = p;
     notifyListeners();
     return true;
