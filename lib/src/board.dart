@@ -15,6 +15,7 @@ class Board extends StatelessWidget {
       onSwipeRight: state.swipeRight,
       onSwipeUp: state.swipeUp,
       onSwipeDown: state.swipeDown,
+      size: state.size / 0.8 * 90,
       child: _board(state, theme),
     );
   }

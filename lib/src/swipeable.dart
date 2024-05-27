@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 class Swipeable extends StatelessWidget {
   const Swipeable({
     super.key,
     required this.child,
+    required this.size,
     this.onSwipeLeft,
     this.onSwipeRight,
     this.onSwipeUp,
@@ -11,6 +13,7 @@ class Swipeable extends StatelessWidget {
   });
 
   final Widget child;
+  final double size;
 
   final VoidCallback? onSwipeLeft;
   final VoidCallback? onSwipeRight;
@@ -51,7 +54,7 @@ class Swipeable extends StatelessWidget {
               }
               return Future.value(false);
             },
-            child: const SizedBox.expand(),
+            child: SizedBox.square(dimension: size),
           ),
         ),
       ],
