@@ -35,6 +35,7 @@ class GameState extends ChangeNotifier {
     for (var i = 0; i < size; i++) {
       for (var j = 0; j < size; j++) {
         _model[i][j] = 0;
+        _offsets[i][j] = Offset.zero;
       }
     }
     score = 0;
