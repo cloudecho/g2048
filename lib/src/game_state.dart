@@ -141,6 +141,7 @@ class GameState extends ChangeNotifier {
         if (nums[k] == nums[k + 1]) {
           nums[k] *= 2;
           nums[k + 1] = 0;
+          score += nums[k];
         }
       }
     }
