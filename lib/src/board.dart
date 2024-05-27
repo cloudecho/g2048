@@ -38,6 +38,7 @@ class Board extends StatelessWidget {
                   num: state.num(i, j),
                   isNew: state.isNewPosition(i, j),
                   offset: state.slideOffset(i, j),
+                  theme: theme,
                 )
             ],
           )
@@ -47,19 +48,21 @@ class Board extends StatelessWidget {
 }
 
 class Tile extends StatelessWidget {
-  const Tile(
-      {super.key,
-      required this.num,
-      required this.isNew,
-      required this.offset});
+  const Tile({
+    super.key,
+    required this.num,
+    required this.isNew,
+    required this.offset,
+    required this.theme,
+  });
 
   final int num;
   final bool isNew;
   final Offset offset;
+  final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
     var w = Container(
       width: 89,
       height: 89,
@@ -74,17 +77,16 @@ class Tile extends StatelessWidget {
         ),
       ),
     );
-    return isNew
-        ? TwinkleWidget(
-            begin: 0.5,
-            end: 1.0,
-            repeat: false,
-            speed: const Duration(milliseconds: kTwinkleMilliseconds),
-            child: w)
-        : SlideWidget(
-            key: Key('slide-${DateTime.now().millisecond}'),
-            offset: offset,
-            duration: const Duration(milliseconds: kSlideMilliseconds),
-            child: w);
+    return SlideWidget(
+      offset: offset,
+      duration: const Duration(milliseconds: kSlideMilliseconds),
+      child: TwinkleWidget(
+        begin: isNew ? 0.2 : 1.0,
+        end: 1.0,
+        repeat: false,
+        speed: const Duration(milliseconds: kTwinkleMilliseconds),
+        child: w,
+      ),
+    );
   }
 }
