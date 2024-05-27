@@ -1,5 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:g2048/src/constants.dart';
 import 'package:g2048/src/game_state.dart';
+import 'package:g2048/src/style/slide_widget.dart';
+import 'package:g2048/src/style/twinkle_widget.dart';
 import 'package:g2048/src/swipeable.dart';
 import 'package:provider/provider.dart';
 
@@ -15,12 +19,12 @@ class Board extends StatelessWidget {
       onSwipeRight: state.swipeRight,
       onSwipeUp: state.swipeUp,
       onSwipeDown: state.swipeDown,
-      size: state.size / 0.8 * 90,
+      size: state.size * 90 * 0.9,
       child: _board(state, theme),
     );
   }
 
-  Column _board(GameState state, ThemeData theme) {
+  Widget _board(GameState state, ThemeData theme) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -29,25 +33,58 @@ class Board extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               for (var j = 0; j < state.size; j++)
-                Container(
-                  width: 89,
-                  height: 89,
-                  color: state.num(i, j) > 0
-                      ? Colors.brown.shade200
-                      : Colors.brown,
-                  margin: const EdgeInsets.all(4),
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      state.text(i, j),
-                      style: theme.textTheme.headlineLarge!
-                          .copyWith(fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                Tile(
+                  key: Key('tile-$i-$j'),
+                  num: state.num(i, j),
+                  isNew: state.isNewPosition(i, j),
+                  offset: state.slideOffset(i, j),
                 )
             ],
           )
       ],
     );
+  }
+}
+
+class Tile extends StatelessWidget {
+  const Tile(
+      {super.key,
+      required this.num,
+      required this.isNew,
+      required this.offset});
+
+  final int num;
+  final bool isNew;
+  final Offset offset;
+
+  @override
+  Widget build(BuildContext context) {
+    var theme = Theme.of(context);
+    var w = Container(
+      width: 89,
+      height: 89,
+      color: num > 0 ? Colors.brown.shade200 : Colors.brown,
+      margin: const EdgeInsets.all(4),
+      child: Align(
+        alignment: Alignment.center,
+        child: Text(
+          num > 0 ? '$num' : '',
+          style: theme.textTheme.displayMedium!
+              .copyWith(fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+    return isNew
+        ? TwinkleWidget(
+            begin: 0.5,
+            end: 1.0,
+            repeat: false,
+            speed: const Duration(milliseconds: kTwinkleMilliseconds),
+            child: w)
+        : SlideWidget(
+            key: Key('slide-${DateTime.now().millisecond}'),
+            offset: offset,
+            duration: const Duration(milliseconds: kSlideMilliseconds),
+            child: w);
   }
 }

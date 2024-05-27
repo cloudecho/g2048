@@ -1,6 +1,5 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
+import 'package:g2048/src/constants.dart';
 import 'package:g2048/src/types.dart';
 import 'dart:math' as math;
 
@@ -12,6 +11,11 @@ class GameState extends ChangeNotifier {
           _rank,
           (_) => List.filled(_rank, 0, growable: false),
           growable: false,
+        ),
+        _offsets = List.generate(
+          _rank,
+          (_) => List.filled(_rank, Offset.zero, growable: false),
+          growable: false,
         ) {
     _init();
   }
@@ -19,6 +23,7 @@ class GameState extends ChangeNotifier {
   int get size => _rank;
 
   final Model _model;
+  final List<List<Offset>> _offsets;
   int score = 0;
 
   void _init() {
@@ -36,7 +41,7 @@ class GameState extends ChangeNotifier {
   }
 
   int num(int i, int j) => _model[i][j];
-  String text(int i, int j) => 0 == num(i, j) ? '' : '${num(i, j)}';
+  Offset slideOffset(int i, int j) => _offsets[i][j];
 
   void swipeLeft() {
     _swipe(_swipeLeft);
@@ -54,77 +59,74 @@ class GameState extends ChangeNotifier {
     _swipe(_swipeDown);
   }
 
-  void _swipe(void Function(int) swipeAction) {
+  void _swipe(void Function(int) swipeAction) async {
+    for (var i = 0; i < size; i++) {
+      swipeAction(i);
+    }
+    notifyListeners();
+
+    await _sleep(kSlideMilliseconds);
     for (var k = 0; k < size; k++) {
+      final vertical = swipeAction == _swipeUp || swipeAction == _swipeDown;
+      var nums = vertical ? _numsAtColumn(k) : _model[k];
+      _mergeNumbers(
+        nums,
+        reserve: swipeAction == _swipeRight || swipeAction == _swipeDown,
+      );
+      if (vertical) _updateColumn(k, nums);
       swipeAction(k);
     }
     _nextNum();
   }
 
+  Future<void> _sleep(int milliseconds) async {
+    await Future.delayed(Duration(milliseconds: milliseconds));
+  }
+
   void _swipeLeft(final int i) {
-    // remove zeros
-    var nums = _nonZeros(_model[i]).toList(growable: false);
-    // merge numbers
-    _mergeNumbers(nums);
-    nums = _nonZeros(nums).toList(growable: false);
-    // update model
-    if (_checkUpdate(nums)) {
-      for (var j = 0; j < size; j++) {
-        _model[i][j] = j < nums.length ? nums[j] : 0;
-      }
+    var moves = _removeZeros(_model[i]);
+    for (var k = 0; k < size; k++) {
+      _offsets[i][k] = Offset(moves[k].toDouble(), 0);
     }
   }
 
   void _swipeRight(final int i) {
-    // remove zeros
-    var nums = _nonZeros(_model[i]).toList(growable: false);
-    // merge numbers
-    _mergeNumbers(nums, reserve: true);
-    nums = _nonZeros(nums).toList(growable: false);
-    // update model
-    if (_checkUpdate(nums)) {
-      for (var j = size - 1, k = nums.length - 1; j >= 0; j--, k--) {
-        _model[i][j] = k >= 0 ? nums[k] : 0;
-      }
+    var moves = _removeZeros(_model[i], reverse: true);
+    for (var k = 0; k < size; k++) {
+      _offsets[i][k] = Offset(-moves[k].toDouble(), 0);
     }
   }
 
   void _swipeUp(final int j) {
-    // remove zeros
-    var nums = _nonZerosAtColumn(j);
-    // merge numbers
-    _mergeNumbers(nums);
-    nums = _nonZeros(nums).toList(growable: false);
-    // update model
-    if (_checkUpdate(nums)) {
-      for (var i = 0; i < size; i++) {
-        _model[i][j] = i < nums.length ? nums[i] : 0;
-      }
+    var nums = _numsAtColumn(j);
+    var moves = _removeZeros(nums);
+    _updateColumn(j, nums);
+    for (var k = 0; k < size; k++) {
+      _offsets[k][j] = Offset(0, moves[k].toDouble());
     }
   }
 
   void _swipeDown(final int j) {
-    // remove zeros
-    var nums = _nonZerosAtColumn(j);
-    // merge numbers
-    _mergeNumbers(nums, reserve: true);
-    nums = _nonZeros(nums).toList(growable: false);
-    // update model
-    if (_checkUpdate(nums)) {
-      for (var i = size - 1, k = nums.length - 1; i >= 0; i--, k--) {
-        _model[i][j] = k >= 0 ? nums[k] : 0;
-      }
+    var nums = _numsAtColumn(j);
+    var moves = _removeZeros(nums, reverse: true);
+    _updateColumn(j, nums);
+    for (var k = 0; k < size; k++) {
+      _offsets[k][j] = Offset(0, -moves[k].toDouble());
     }
   }
 
-  bool _checkUpdate(List<int> nums) => nums.isNotEmpty && nums.length < size;
-
-  List<int> _nonZerosAtColumn(int j) {
+  List<int> _numsAtColumn(int j) {
     var nums = <int>[];
     for (var i = 0; i < size; i++) {
-      if (_model[i][j] > 0) nums.add(_model[i][j]);
+      nums.add(_model[i][j]);
     }
     return nums;
+  }
+
+  void _updateColumn(final int j, final List<int> nums) {
+    for (var i = 0; i < size; i++) {
+      _model[i][j] = nums[i];
+    }
   }
 
   void _mergeNumbers(List<int> nums, {bool reserve = false}) {
@@ -147,7 +149,44 @@ class GameState extends ChangeNotifier {
     }
   }
 
-  Iterable<int> _nonZeros(Iterable<int> nums) => nums.where((e) => e != 0);
+  List<int> _removeZeros(List<int> nums, {bool reverse = false}) {
+    var moves = List.filled(nums.length, 0, growable: false);
+    if (reverse) {
+      for (var k = nums.length - 2; k >= 0; k--) {
+        if (nums[k] == 0) continue;
+        var count = 0, i = k + 1;
+        for (; i < nums.length; i++) {
+          if (nums[i] == 0) {
+            nums[i] = nums[i - 1];
+            nums[i - 1] = 0;
+            count++;
+          } else {
+            // no zero anymore
+            break;
+          }
+        }
+        moves[i - 1] = count;
+      }
+    } else {
+      for (var k = 1; k < nums.length; k++) {
+        if (nums[k] == 0) continue;
+        var count = 0, i = k - 1;
+        for (; i >= 0; i--) {
+          if (nums[i] == 0) {
+            nums[i] = nums[i + 1];
+            nums[i + 1] = 0;
+            count++;
+          } else {
+            // no zero anymore
+            break;
+          }
+        }
+        moves[i + 1] = count;
+      }
+    }
+    // debugPrint('moves: $moves');
+    return moves;
+  }
 
   static final _rand = math.Random();
 
@@ -168,4 +207,8 @@ class GameState extends ChangeNotifier {
   }
 
   Point? _newPostion;
+
+  bool isNewPosition(int x, int y) {
+    return _newPostion == (x: x, y: y);
+  }
 }
