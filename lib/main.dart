@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:g2048/src/board.dart';
+import 'package:g2048/src/constants.dart';
 import 'package:g2048/src/game_state.dart';
+import 'package:g2048/src/status_pane.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -16,7 +18,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: kMainColor),
         useMaterial3: true,
       ),
       home: ChangeNotifierProvider(
@@ -32,14 +34,16 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var state = context.watch<GameState>();
-    return Scaffold(
-      appBar: AppBar(title: const Text('2048')),
-      body: Column(
-        children: [
-          Text('${state.score}'),
-          const Board(),
-        ],
+    return const Scaffold(
+      body:  Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            StatusPane(),
+            SizedBox(height: kTileSize/2),
+            Board(),
+          ],
+        ),
       ),
     );
   }

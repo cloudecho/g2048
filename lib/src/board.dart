@@ -1,10 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:g2048/src/constants.dart';
 import 'package:g2048/src/game_state.dart';
 import 'package:g2048/src/style/slide_widget.dart';
 import 'package:g2048/src/style/twinkle_widget.dart';
-import 'package:g2048/src/swipeable.dart';
+import 'package:g2048/src/style/swipeable.dart';
 import 'package:provider/provider.dart';
 
 class Board extends StatelessWidget {
@@ -19,8 +18,15 @@ class Board extends StatelessWidget {
       onSwipeRight: state.swipeRight,
       onSwipeUp: state.swipeUp,
       onSwipeDown: state.swipeDown,
-      size: state.size * 90 * 0.9,
-      child: _board(state, theme),
+      size: state.size * kTileSize,
+      child: Container(
+          width: state.size * (kTileSize + 3 * kMargin),
+          height: state.size * (kTileSize + 3 * kMargin),
+          decoration: const BoxDecoration(
+            color: kMainColor,
+            borderRadius: BorderRadius.all(Radius.circular(kMargin)),
+          ),
+          child: _board(state, theme)),
     );
   }
 
@@ -64,20 +70,26 @@ class Tile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var w = Container(
-      width: 89,
-      height: 89,
-      color: num > 0 ? Colors.brown.shade200 : Colors.brown,
-      margin: const EdgeInsets.all(4),
+      width: kTileSize,
+      height: kTileSize,
+      margin: const EdgeInsets.all(kMargin),
+      decoration: BoxDecoration(
+        color: _bgColor,
+        borderRadius: const BorderRadius.all(Radius.circular(kMargin)),
+      ),
       child: Align(
         alignment: Alignment.center,
         child: Text(
           num > 0 ? '$num' : '',
-          style: theme.textTheme.displayMedium!
-              .copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.displayMedium!.copyWith(
+            fontWeight: FontWeight.bold,
+            color: _fontColor,
+          ),
         ),
       ),
     );
     return SlideWidget(
+      key: Key('${key?.toString()}-${DateTime.now().microsecond}'),
       offset: offset,
       duration: const Duration(milliseconds: kSlideMilliseconds),
       child: TwinkleWidget(
@@ -89,4 +101,8 @@ class Tile extends StatelessWidget {
       ),
     );
   }
+
+  Color get _bgColor => num > 0 ? kMainColor.shade200 : kMainColor.shade400;
+
+  Color get _fontColor => Colors.black54;
 }
