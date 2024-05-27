@@ -61,6 +61,7 @@ class GameState extends ChangeNotifier {
   }
 
   void _swipe(void Function(int) swipeAction) async {
+    _resetNewPosition();
     for (var i = 0; i < size; i++) {
       swipeAction(i);
     }
@@ -78,6 +79,10 @@ class GameState extends ChangeNotifier {
       swipeAction(k);
     }
     _nextNum();
+  }
+
+  void _resetNewPosition() {
+    _newPostion = null;
   }
 
   Future<void> _sleep(int milliseconds) async {
