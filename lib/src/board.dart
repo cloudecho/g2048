@@ -26,7 +26,10 @@ class Board extends StatelessWidget {
             color: kMainColor,
             borderRadius: BorderRadius.all(Radius.circular(kMargin)),
           ),
-          child: _board(state, theme)),
+          child: Stack(children: [
+            _boardBackground(state, theme),
+            _board(state, theme),
+          ])),
     );
   }
 
@@ -44,6 +47,28 @@ class Board extends StatelessWidget {
                   num: state.num(i, j),
                   isNew: state.isNewPosition(i, j),
                   offset: state.slideOffset(i, j),
+                  theme: theme,
+                )
+            ],
+          )
+      ],
+    );
+  }
+
+  Widget _boardBackground(GameState state, ThemeData theme) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (var i = 0; i < state.size; i++)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var j = 0; j < state.size; j++)
+                Tile(
+                  key: Key('backgroud-$i-$j'),
+                  num: -1,
+                  isNew: false,
+                  offset: Offset.zero,
                   theme: theme,
                 )
             ],
@@ -88,6 +113,7 @@ class Tile extends StatelessWidget {
         ),
       ),
     );
+    if (num <= 0) return w;
     return SlideWidget(
       key: Key('${key?.toString()}-${DateTime.now().microsecond}'),
       offset: offset,
@@ -103,7 +129,8 @@ class Tile extends StatelessWidget {
   }
 
   Color get _bgColor => switch (num) {
-        0 => kMainColor.shade400,
+        -1 => kMainColor.shade400,
+        0 => Colors.transparent,
         2 => kMainColor.shade200,
         4 => Colors.indigoAccent.shade100,
         8 => Colors.lightBlue.shade500,
