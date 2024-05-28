@@ -20,8 +20,8 @@ class Board extends StatelessWidget {
       onSwipeDown: state.swipeDown,
       size: state.size * kTileSize,
       child: Container(
-          width: state.size * (kTileSize + 3 * kMargin),
-          height: state.size * (kTileSize + 3 * kMargin),
+          width: state.boardSize,
+          height: state.boardSize,
           decoration: const BoxDecoration(
             color: kMainColor,
             borderRadius: BorderRadius.all(Radius.circular(kMargin)),
@@ -109,6 +109,7 @@ class Tile extends StatelessWidget {
           style: theme.textTheme.displayMedium!.copyWith(
             fontWeight: FontWeight.bold,
             color: _fontColor,
+            fontSize: _fontSize,
           ),
         ),
       ),
@@ -148,4 +149,10 @@ class Tile extends StatelessWidget {
       };
 
   Color get _fontColor => num > 4 ? Colors.white70 : Colors.black54;
+
+  double? get _fontSize {
+    if (num < 100) return null;
+    var s = theme.textTheme.displayMedium!.fontSize!;
+    return 2.5 * s / '$num'.length;
+  }
 }

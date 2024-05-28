@@ -21,10 +21,12 @@ class GameState extends ChangeNotifier {
   }
 
   int get size => _rank;
+  double get boardSize => size * (kTileSize + 3 * kMargin);
 
   final Model _model;
   final List<List<Offset>> _offsets;
   int score = 0;
+  bool done = false;
 
   void _init() {
     _model[size - 1][0] = 2;
@@ -39,6 +41,12 @@ class GameState extends ChangeNotifier {
       }
     }
     score = 0;
+    done = false;
+  }
+
+  void restart() {
+    _reset();
+    _init();
   }
 
   int num(int i, int j) => _model[i][j];
@@ -79,6 +87,26 @@ class GameState extends ChangeNotifier {
       swipeAction(k);
     }
     _nextNum();
+    _checkDone();
+    notifyListeners();
+  }
+
+  void _checkDone() {
+    for (var k = 0; k < size; k++) {
+      if (!_isDone(_model[k]) || !_isDone(_numsAtColumn(k))) {
+        return;
+      }
+    }
+    done = true;
+  }
+
+  bool _isDone(List<int> nums) {
+    for (var k = 0; k < nums.length; k++) {
+      if (0 == nums[k] || (k > 0 && nums[k - 1] == nums[k])) {
+        return false;
+      }
+    }
+    return true;
   }
 
   void _resetNewPosition() {
@@ -208,7 +236,6 @@ class GameState extends ChangeNotifier {
     var p = points[_rand.nextInt(points.length)];
     _model[p.x][p.y] = _rand.nextDouble() < 0.1 ? 4 : 2;
     _newPostion = p;
-    notifyListeners();
     return true;
   }
 
