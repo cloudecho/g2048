@@ -13,24 +13,17 @@ class Board extends StatelessWidget {
   Widget build(BuildContext context) {
     var state = context.watch<GameState>();
     var theme = Theme.of(context);
-    return Swipeable(
-      onSwipeLeft: state.swipeLeft,
-      onSwipeRight: state.swipeRight,
-      onSwipeUp: state.swipeUp,
-      onSwipeDown: state.swipeDown,
-      size: state.size * kTileSize,
-      child: Container(
-          width: state.boardSize,
-          height: state.boardSize,
-          decoration: const BoxDecoration(
-            color: kMainColor,
-            borderRadius: BorderRadius.all(Radius.circular(kMargin)),
-          ),
-          child: Stack(children: [
-            _boardBackground(state, theme),
-            _board(state, theme),
-          ])),
-    );
+    return Container(
+        width: state.boardSize,
+        height: state.boardSize,
+        decoration: const BoxDecoration(
+          color: kMainColor,
+          borderRadius: BorderRadius.all(Radius.circular(kMargin)),
+        ),
+        child: Stack(children: [
+          _boardBackground(state, theme),
+          _board(state, theme),
+        ]));
   }
 
   Widget _board(GameState state, ThemeData theme) {
@@ -42,12 +35,19 @@ class Board extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               for (var j = 0; j < state.size; j++)
-                Tile(
+                Swipeable(
                   key: Key('tile-$i-$j'),
-                  num: state.num(i, j),
-                  isNew: state.isNewPosition(i, j),
-                  offset: state.slideOffset(i, j),
-                  theme: theme,
+                  onSwipeLeft: state.swipeLeft,
+                  onSwipeRight: state.swipeRight,
+                  onSwipeUp: state.swipeUp,
+                  onSwipeDown: state.swipeDown,
+                  size: kTileSize,
+                  child: Tile(
+                    num: state.num(i, j),
+                    isNew: state.isNewPosition(i, j),
+                    offset: state.slideOffset(i, j),
+                    theme: theme,
+                  ),
                 )
             ],
           )

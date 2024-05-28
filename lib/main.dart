@@ -5,6 +5,7 @@ import 'package:g2048/src/constants.dart';
 import 'package:g2048/src/game_over.dart';
 import 'package:g2048/src/game_state.dart';
 import 'package:g2048/src/status_pane.dart';
+import 'package:g2048/src/version.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -20,9 +21,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: kMainColor),
-        useMaterial3: true,
-      ),
+          colorScheme: ColorScheme.fromSeed(seedColor: kMainColor),
+          useMaterial3: true,
+          bottomSheetTheme: const BottomSheetThemeData(
+            backgroundColor: Colors.transparent,
+          )),
       home: ChangeNotifierProvider(
         create: (context) => GameState(),
         child: const HomeScreen(),
@@ -37,6 +40,15 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
+      bottomSheet: Padding(
+        padding: EdgeInsets.all(kTileSize / 5),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('ver: $kVersion'),
+          ],
+        ),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
