@@ -79,12 +79,11 @@ class GameState extends ChangeNotifier {
     await _sleep(kSlideMilliseconds);
     for (var k = 0; k < size; k++) {
       final vertical = swipeAction == _swipeUp || swipeAction == _swipeDown;
-      var nums = vertical ? _numsAtColumn(k) : _model[k];
+      var nums = _nums(k, column: vertical);
       _mergeNumbers(
         nums,
         reserve: swipeAction == _swipeRight || swipeAction == _swipeDown,
       );
-      if (vertical) _updateColumn(k, nums);
       swipeAction(k);
     }
     _nextNum();
@@ -94,14 +93,14 @@ class GameState extends ChangeNotifier {
 
   void _checkDone() {
     for (var k = 0; k < size; k++) {
-      if (!_isDone(_model[k]) || !_isDone(_numsAtColumn(k))) {
+      if (!_isDone(_nums(k)) || !_isDone(_numsAtColumn(k))) {
         return;
       }
     }
     done = true;
   }
 
-  bool _isDone(List<int> nums) {
+  bool _isDone(Nums nums) {
     for (var k = 0; k < nums.length; k++) {
       if (0 == nums[k] || (k > 0 && nums[k - 1] == nums[k])) {
         return false;
@@ -119,14 +118,14 @@ class GameState extends ChangeNotifier {
   }
 
   void _swipeLeft(final int i) {
-    var moves = _removeZeros(_model[i]);
+    var moves = _removeZeros(_nums(i));
     for (var k = 0; k < size; k++) {
       _offsets[i][k] = Offset(moves[k].toDouble(), 0);
     }
   }
 
   void _swipeRight(final int i) {
-    var moves = _removeZeros(_model[i], reverse: true);
+    var moves = _removeZeros(_nums(i), reverse: true);
     for (var k = 0; k < size; k++) {
       _offsets[i][k] = Offset(-moves[k].toDouble(), 0);
     }
@@ -135,36 +134,22 @@ class GameState extends ChangeNotifier {
   void _swipeUp(final int j) {
     var nums = _numsAtColumn(j);
     var moves = _removeZeros(nums);
-    _updateColumn(j, nums);
     for (var k = 0; k < size; k++) {
       _offsets[k][j] = Offset(0, moves[k].toDouble());
     }
   }
 
   void _swipeDown(final int j) {
-    var nums = _numsAtColumn(j);
+    var nums = _nums(j, column: true);
     var moves = _removeZeros(nums, reverse: true);
-    _updateColumn(j, nums);
     for (var k = 0; k < size; k++) {
       _offsets[k][j] = Offset(0, -moves[k].toDouble());
     }
   }
 
-  List<int> _numsAtColumn(int j) {
-    var nums = <int>[];
-    for (var i = 0; i < size; i++) {
-      nums.add(_model[i][j]);
-    }
-    return nums;
-  }
+  Nums _numsAtColumn(int j) => _nums(j, column: true);
 
-  void _updateColumn(final int j, final List<int> nums) {
-    for (var i = 0; i < size; i++) {
-      _model[i][j] = nums[i];
-    }
-  }
-
-  void _mergeNumbers(List<int> nums, {bool reserve = false}) {
+  void _mergeNumbers(Nums nums, {bool reserve = false}) {
     if (reserve) {
       for (var k = nums.length - 1; k > 0; k--) {
         if (nums[k] == nums[k - 1]) {
@@ -184,7 +169,7 @@ class GameState extends ChangeNotifier {
     }
   }
 
-  List<int> _removeZeros(List<int> nums, {bool reverse = false}) {
+  List<int> _removeZeros(Nums nums, {bool reverse = false}) {
     var moves = List.filled(nums.length, 0, growable: false);
     if (reverse) {
       for (var k = nums.length - 2; k >= 0; k--) {
@@ -236,5 +221,30 @@ class GameState extends ChangeNotifier {
 
   bool isNewPosition(int x, int y) {
     return _newPostion == (x: x, y: y);
+  }
+
+  Nums _nums(int which, {bool column = false}) =>
+      Nums(_model, which, column: column);
+}
+
+/// A row or a column of numbers
+class Nums {
+  Nums(this.model, this.which, {this.column = false});
+  final Model model;
+
+  /// Which row or column
+  final int which;
+  final bool column;
+
+  int get length => column ? model[0].length : model.length;
+
+  int operator [](int k) => column ? model[k][which] : model[which][k];
+
+  operator []=(int k, int value) {
+    if (column) {
+      model[k][which] = value;
+    } else {
+      model[which][k] = value;
+    }
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:g2048/src/board.dart';
 import 'package:g2048/src/constants.dart';
 import 'package:g2048/src/game_over.dart';
@@ -19,7 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: '2048',
       theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: kMainColor),
           useMaterial3: true,
