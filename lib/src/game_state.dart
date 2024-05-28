@@ -47,6 +47,7 @@ class GameState extends ChangeNotifier {
   void restart() {
     _reset();
     _init();
+    notifyListeners();
   }
 
   int num(int i, int j) => _model[i][j];
