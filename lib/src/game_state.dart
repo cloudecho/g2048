@@ -69,26 +69,35 @@ class GameState extends ChangeNotifier {
     _swipe(_swipeDown);
   }
 
-  void _swipe(void Function(int) swipeAction) async {
+  void _swipe(bool Function(int) swipeAction) async {
+    // move zeros
     _resetNewPosition();
+    var hasMoved = false;
     for (var i = 0; i < size; i++) {
-      swipeAction(i);
+      hasMoved |= swipeAction(i);
     }
-    notifyListeners();
+    if (hasMoved) notifyListeners();
 
+    // merge numbers
     await _sleep(kSlideMilliseconds);
+    var gotScore = 0;
     for (var k = 0; k < size; k++) {
       final vertical = swipeAction == _swipeUp || swipeAction == _swipeDown;
       var nums = _nums(k, column: vertical);
-      _mergeNumbers(
+      gotScore += _mergeNumbers(
         nums,
         reserve: swipeAction == _swipeRight || swipeAction == _swipeDown,
       );
       swipeAction(k);
     }
-    _nextNum();
-    _checkDone();
-    notifyListeners();
+
+    // score & next number
+    if (hasMoved || gotScore > 0) {
+      score += gotScore;
+      _nextNum();
+      _checkDone();
+      notifyListeners();
+    }
   }
 
   void _checkDone() {
@@ -117,59 +126,75 @@ class GameState extends ChangeNotifier {
     await Future.delayed(Duration(milliseconds: milliseconds));
   }
 
-  void _swipeLeft(final int i) {
-    var moves = _removeZeros(_nums(i));
+  bool _swipeLeft(final int i) {
+    var hasMoved = false;
+    var moves = _moveZeros(_nums(i));
     for (var k = 0; k < size; k++) {
+      hasMoved |= moves[k] > 0;
       _offsets[i][k] = Offset(moves[k].toDouble(), 0);
     }
+    return hasMoved;
   }
 
-  void _swipeRight(final int i) {
-    var moves = _removeZeros(_nums(i), reverse: true);
+  bool _swipeRight(final int i) {
+    var hasMoved = false;
+    var moves = _moveZeros(_nums(i), reverse: true);
     for (var k = 0; k < size; k++) {
+      hasMoved |= moves[k] > 0;
       _offsets[i][k] = Offset(-moves[k].toDouble(), 0);
     }
+    return hasMoved;
   }
 
-  void _swipeUp(final int j) {
+  bool _swipeUp(final int j) {
+    var hasMoved = false;
     var nums = _numsAtColumn(j);
-    var moves = _removeZeros(nums);
+    var moves = _moveZeros(nums);
     for (var k = 0; k < size; k++) {
+      hasMoved |= moves[k] > 0;
       _offsets[k][j] = Offset(0, moves[k].toDouble());
     }
+    return hasMoved;
   }
 
-  void _swipeDown(final int j) {
-    var nums = _nums(j, column: true);
-    var moves = _removeZeros(nums, reverse: true);
+  bool _swipeDown(final int j) {
+    var hasMoved = false;
+    var nums = _numsAtColumn(j);
+    var moves = _moveZeros(nums, reverse: true);
     for (var k = 0; k < size; k++) {
+      hasMoved |= moves[k] > 0;
       _offsets[k][j] = Offset(0, -moves[k].toDouble());
     }
+    return hasMoved;
   }
 
   Nums _numsAtColumn(int j) => _nums(j, column: true);
 
-  void _mergeNumbers(Nums nums, {bool reserve = false}) {
+  int _mergeNumbers(Nums nums, {bool reserve = false}) {
+    var gotScore = 0;
     if (reserve) {
       for (var k = nums.length - 1; k > 0; k--) {
+        if (nums[k] == 0) continue;
         if (nums[k] == nums[k - 1]) {
           nums[k] *= 2;
           nums[k - 1] = 0;
-          score += nums[k];
+          gotScore += nums[k];
         }
       }
     } else {
       for (var k = 0; k < nums.length - 1; k++) {
+        if (nums[k] == 0) continue;
         if (nums[k] == nums[k + 1]) {
           nums[k] *= 2;
           nums[k + 1] = 0;
-          score += nums[k];
+          gotScore += nums[k];
         }
       }
     }
+    return gotScore;
   }
 
-  List<int> _removeZeros(Nums nums, {bool reverse = false}) {
+  List<int> _moveZeros(Nums nums, {bool reverse = false}) {
     var moves = List.filled(nums.length, 0, growable: false);
     if (reverse) {
       for (var k = nums.length - 2; k >= 0; k--) {
