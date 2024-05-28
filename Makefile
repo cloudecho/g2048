@@ -1,4 +1,4 @@
-VER?=0.1.1
+VER?=0.1.2
 
 ver:
 	sed -iE "s/kVersion = '.*'/kVersion = '$(VER)'/g"  lib/src/version.dart
