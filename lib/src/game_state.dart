@@ -188,34 +188,26 @@ class GameState extends ChangeNotifier {
     if (reverse) {
       for (var k = nums.length - 2; k >= 0; k--) {
         if (nums[k] == 0) continue;
-        var count = 0, i = k + 1;
-        for (; i < nums.length; i++) {
-          if (nums[i] == 0) {
-            nums[i] = nums[i - 1];
-            nums[i - 1] = 0;
-            count++;
-          } else {
-            // no zero anymore
-            break;
-          }
+        var i = k + 1;
+        for (; i < nums.length && nums[i] == 0; i++) {}
+        var count = i - (k + 1);
+        if (count > 0) {
+          nums[i - 1] = nums[k];
+          nums[k] = 0;
+          moves[i - 1] = count;
         }
-        moves[i - 1] = count;
       }
     } else {
       for (var k = 1; k < nums.length; k++) {
         if (nums[k] == 0) continue;
-        var count = 0, i = k - 1;
-        for (; i >= 0; i--) {
-          if (nums[i] == 0) {
-            nums[i] = nums[i + 1];
-            nums[i + 1] = 0;
-            count++;
-          } else {
-            // no zero anymore
-            break;
-          }
+        var i = k - 1;
+        for (; i >= 0 && nums[i] == 0; i--) {}
+        var count = (k - 1) - i;
+        if (count > 0) {
+          nums[i + 1] = nums[k];
+          nums[k] = 0;
+          moves[i + 1] = count;
         }
-        moves[i + 1] = count;
       }
     }
     // debugPrint('moves: $moves');
