@@ -18,7 +18,7 @@ class Board extends StatelessWidget {
         height: state.boardSize,
         decoration: const BoxDecoration(
           color: kMainColor,
-          borderRadius: BorderRadius.all(Radius.circular(kMargin)),
+          borderRadius: BorderRadius.all(Radius.circular(4 * kMargin)),
         ),
         child: Stack(children: [
           _boardBackground(state, theme),
