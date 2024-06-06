@@ -1,6 +1,6 @@
 # g2048
 
-A new Flutter project.
+Game 2048
 
 ## Getting Started
 
