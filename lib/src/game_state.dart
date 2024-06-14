@@ -168,11 +168,10 @@ class GameState extends ChangeNotifier {
     return hasMoved;
   }
 
-  Nums _numsAtColumn(int j) => _nums(j, column: true);
-
   /// Merge the adjacent non-zero number into a bigger one,
-  /// from left to right if [reserve] is false,
-  /// or from right to left if [reserve] is true
+  /// from left to right if [reserve] is `false`,
+  /// or from right to left if [reserve] is `true`.
+  /// Return the score to be accumulated.
   int _mergeNumbers(Nums nums, {bool reserve = false}) {
     var gotScore = 0;
     if (reserve) {
@@ -198,7 +197,7 @@ class GameState extends ChangeNotifier {
   }
 
   /// Move the non-zero numbers to the left side if [reverse] is false,
-  /// or to the right side if [reverse] is true
+  /// or to the right side if [reverse] is `true`
   List<int> _moveZeros(Nums nums, {bool reverse = false}) {
     var moves = List.filled(nums.length, 0, growable: false);
     if (reverse) {
@@ -231,32 +230,33 @@ class GameState extends ChangeNotifier {
 
   static final _rand = math.Random();
 
-  bool _nextNum() {
+  Point? _newPostion;
+
+  void _nextNum() {
     List<Point> points = [];
     for (var i = 0; i < size; i++) {
       for (var j = 0; j < size; j++) {
         if (0 == _model[i][j]) points.add((x: i, y: j));
       }
     }
-    if (points.isEmpty) return false;
+    if (points.isEmpty) return;
 
     var p = points[_rand.nextInt(points.length)];
     _model[p.x][p.y] = _rand.nextDouble() < 0.1 ? 4 : 2;
     _newPostion = p;
-    return true;
   }
-
-  Point? _newPostion;
 
   bool isNewPosition(int x, int y) {
     return _newPostion == (x: x, y: y);
   }
 
+  Nums _numsAtColumn(int j) => _nums(j, column: true);
+
   Nums _nums(int which, {bool column = false}) =>
       Nums(_model, which, column: column);
 }
 
-/// The view of the numbers in a row or a column 
+/// The view of the numbers in a row or a column
 class Nums {
   Nums(this.model, this.which, {this.column = false});
   final Model model;
