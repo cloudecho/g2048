@@ -170,6 +170,9 @@ class GameState extends ChangeNotifier {
 
   Nums _numsAtColumn(int j) => _nums(j, column: true);
 
+  /// Merge the adjacent non-zero number into a bigger one,
+  /// from left to right if [reserve] is false,
+  /// or from right to left if [reserve] is true
   int _mergeNumbers(Nums nums, {bool reserve = false}) {
     var gotScore = 0;
     if (reserve) {
@@ -194,6 +197,8 @@ class GameState extends ChangeNotifier {
     return gotScore;
   }
 
+  /// Move the non-zero numbers to the left side if [reverse] is false,
+  /// or to the right side if [reverse] is true
   List<int> _moveZeros(Nums nums, {bool reverse = false}) {
     var moves = List.filled(nums.length, 0, growable: false);
     if (reverse) {
@@ -221,7 +226,6 @@ class GameState extends ChangeNotifier {
         }
       }
     }
-    // debugPrint('moves: $moves');
     return moves;
   }
 
@@ -252,7 +256,7 @@ class GameState extends ChangeNotifier {
       Nums(_model, which, column: column);
 }
 
-/// A row or a column of numbers
+/// The view of the numbers in a row or a column 
 class Nums {
   Nums(this.model, this.which, {this.column = false});
   final Model model;
