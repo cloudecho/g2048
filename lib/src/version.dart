@@ -1,1 +1,1 @@
-const kVersion = '0.1.4';
+const kVersion = '0.1.5';
