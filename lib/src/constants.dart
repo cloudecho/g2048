@@ -5,3 +5,5 @@ const kSlideMilliseconds = 100;
 const kTileSize = 81.0;
 const kMainColor = Colors.brown;
 const kMargin = 4.0;
+
+const kMaxWidth = 400.0;

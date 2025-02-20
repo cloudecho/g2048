@@ -49,16 +49,19 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            StatusPane(),
-            SizedBox(height: kTileSize / 2),
-            Stack(children: [
-              Board(),
-              GameOver(),
-            ]),
-          ],
+        child: SizedBox(
+          width: kMaxWidth,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              StatusPane(),
+              SizedBox(height: kTileSize / 2),
+              Stack(children: [
+                Board(),
+                GameOver(),
+              ]),
+            ],
+          ),
         ),
       ),
     );
