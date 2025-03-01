@@ -6,6 +6,8 @@ ver:
 tag: ver
 	git add .
 	git commit -m "ver $(VER)"
-	git tag $(VER)
 	git push
+
+pushtag: tag
+	git tag $(VER)
 	git push origin $(VER)
